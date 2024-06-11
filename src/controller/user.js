@@ -9,8 +9,8 @@ const {rm} = require("fs");
 
 const registerUser = async(req,res,next)=>{
     try{
-        const {_id,name,username,dob,photo,gender,password} = req.body;
-        if(!_id || !name || !username || !dob || !photo || !gender || !password){
+        const {_id,name,username,dob,photo,gender,password,phoneNo} = req.body;
+        if(!_id || !name || !username || !dob || !photo || !gender || !password || !phoneNo){
             return next(new ErrorHandler("Missing Data",400));
         }
         const userExists = await userModel.findOne({username : req.body.username});
@@ -22,7 +22,7 @@ const registerUser = async(req,res,next)=>{
                 return next(new ErrorHandler("Encryption Went Wrong!",404));
             }
             const user = await userModel.create({
-                _id,name,username,password : hash,dob,photo,gender
+                _id,name,username,password : hash,dob,photo,gender,phoneNo
             });
         
             return res.status(201).json({
