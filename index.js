@@ -15,7 +15,7 @@ require("dotenv").config();
 const port = process.env.PORT_NO || 8080;
 
 app.use(cors({
-    origin: "http://localhost:3000"}
+    origin: "https://e-commerce-client-lovat.vercel.app"}
 ));
 app.options('*', cors())
 app.use(helmet());
