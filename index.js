@@ -15,10 +15,9 @@ require("dotenv").config();
 const port = process.env.PORT_NO || 8080;
 
 app.use(cors({
-    origin: "http://localhost:3000",
-    headers: ["Content-Type"],
-    credentials: true,
-}));
+    origin: "http://localhost:3000"}
+));
+app.options('*', cors())
 app.use(helmet());
 app.use(express.json());
 connection(process.env.DB_CONNECT);
