@@ -10,6 +10,7 @@ const {rm} = require("fs");
 const registerUser = async(req,res,next)=>{
     try{
         const {_id,name,username,dob,photo,gender,password,phoneNo} = req.body;
+        console.log(phoneNo,req.body);
         if(!_id || !name || !username || !dob || !photo || !gender || !password || !phoneNo){
             return next(new ErrorHandler("Missing Data",400));
         }
