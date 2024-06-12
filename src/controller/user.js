@@ -136,14 +136,13 @@ const updateUser = async(req,res,next)=>{
         if(!user) return next(new ErrorHandler("Invalid ID!",404));
 
         
-        if(user.photo.split(" ")[0]!=="null" && photo){
-            await reviewModel.updateMany({photo : user.photo},{$set : {photo : photo.path}})
-            rm(user.photo,()=>console.log("Deleted Successfully!"));
-            user.photo = photo.path;
-        }
-        if(user.photo.split(" ")[0]==="null" && photo){
-            await reviewModel.updateMany({photo : user.photo},{$set : {photo : photo.path}})
-            user.photo = photo.path;
+        if(photo){
+            const result = await cloudinary.v2.uploader.upload(photo.path);
+            if(result){
+                await reviewModel.updateMany({photo : user.photo},{$set : {photo : result.secure_url}})
+                user.photo = result.secure_url;
+            }
+            // rm(user.photo,()=>console.log("Deleted Successfully!"));
         }
         
         if(name) {
@@ -177,7 +176,7 @@ const deletePhoto = async(req,res,next)=>{
 
         if(user){
             await reviewModel.updateMany({photo : user.photo},{$set : {photo : photo}})
-            rm(user.photo,()=>console.log("Deleted Successfully!"));
+            // rm(user.photo,()=>console.log("Deleted Successfully!"));
             user.photo = photo;
         }
 
@@ -185,7 +184,7 @@ const deletePhoto = async(req,res,next)=>{
 
         res.status(200).json({
             success : true,
-            message : "DELETED SUCCFULLY!"
+            message : "DELETED SUCCESSFULLY!"
         })
 
     }
