@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const {rm} = require("fs");
+const cloudinary = require("cloudinary");
 
 
 const registerUser = async(req,res,next)=>{
