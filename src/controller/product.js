@@ -3,6 +3,7 @@ const productModel = require("../models/products");
 const {rm} = require("fs");
 const NodeCache = require("node-cache");
 const myCache = new NodeCache();
+const cloudinary = require("cloudinary");
 
 const newProduct = async(req,res,next)=>{
     try{
@@ -11,23 +12,29 @@ const newProduct = async(req,res,next)=>{
         if(!photo) return next(new ErrorHandler("Please Add Photo!",400));
         if(!name || !price || !stock || !category){
             rm(photo.path,()=>console.log("Deleted Successfully !"));
-
             return next(new ErrorHandler("Missing Data",400));
         }
-        await productModel.create({
-            name,
-            stock,
-            price,
-            category,
-            photo : photo.path
-        })
+        const result = await cloudinary.v2.uploader.upload(photo.path);
+        if(result){
+            await productModel.create({
+                name,
+                stock,
+                price,
+                category,
+                photo : result.secure_url
+            });
 
-        await invalidate({product : true});
+            await invalidate({product : true});
 
-        return res.status(201).json({
-            message : "Product Created Successfully!",
-            success : true
-        })
+            return res.status(201).json({
+                message : "Product Created Successfully!",
+                success : true
+            })
+
+        }
+        else{
+            return next(new ErrorHandler("Cloud Error",401));
+        }
     }
     catch(err){
         return next(err);
@@ -131,8 +138,12 @@ const updateProduct = async(req,res,next)=>{
         if(!product) return next(new ErrorHandler("Invalid ID!",404));
 
         if(photo){
-            rm(product.photo,()=>console.log("Deleted Successfully!"));
-            product.photo = photo.path;
+            // rm(product.photo,()=>console.log("Deleted Successfully!"));
+            const result = await cloudinary.v2.uploader.upload(photo.path);
+            if(result)  product.photo = result.secure_url;
+            else{
+                return next(new ErrorHandler("Cloud Error",404));
+            }
         }
 
         if(name) product.name = name;
@@ -145,7 +156,7 @@ const updateProduct = async(req,res,next)=>{
 
         res.status(200).json({
             success : true,
-            message : "UPDATED SUCCFULLY!"
+            message : "UPDATED SUCCESSFULLY!"
         })
     }
     catch(err){
@@ -157,7 +168,7 @@ const deleteProduct = async(req,res,next)=>{
     try{
         const single = await productModel.findById(req.params.id);
         if(!single) return next(new ErrorHandler("No Product Found!",404));
-        rm(single.photo,()=>console.log("Deleted Sucessfully!"))
+        // rm(single.photo,()=>console.log("Deleted Sucessfully!"))
         await productModel.deleteOne({_id : req.params.id});
         await invalidate({product : true});
         res.status(200).json({
