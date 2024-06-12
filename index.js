@@ -9,6 +9,7 @@ const infoRoute = require("./src/routes/info");
 const reviewRoute = require('./src/routes/review');
 const app = express();
 const helmet = require("helmet");
+const cloudinary = require("cloudinary");
 const cors = require("cors");
 require("dotenv").config();
 
@@ -20,7 +21,13 @@ app.use(cors({
 app.options('*', cors())
 app.use(helmet());
 app.use(express.json());
+
 connection(process.env.DB_CONNECT);
+cloudinary.v2.config({
+    cloud_name : process.env.CLOUD_NAME,
+    api_key : process.env.CLOUD_KEY,
+    api_secret : process.env.CLOUD_SECRET
+})
 
 app.use("/api/user",userRoute);
 app.use("/api/product",productRoute);
